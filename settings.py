@@ -1,7 +1,12 @@
-BASE_URL = "https://staging-qscfgrt657.duckdns.org"
+import os
+from dotenv import load_dotenv
 
-ADMIN_EMAIL = "admin@example.com"
-ADMIN_PASSWORD = "password_admin"
+load_dotenv()
 
-USER_EMAIL = "user@example.com"
-USER_PASSWORD = "password_user"
+BASE_URL = os.getenv("baseUrl")
+
+ADMIN_EMAIL = os.getenv("adminEmail")
+ADMIN_PASSWORD = os.getenv("adminPassword")
+
+USER_EMAIL = os.getenv("userEmail")
+USER_PASSWORD = os.getenv("userPassword")

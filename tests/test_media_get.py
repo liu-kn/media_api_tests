@@ -1,19 +1,67 @@
+from media_api_tests.settings import BASE_URL
 import requests
 
 
-def test_get_media_by_id_admin(base_url, admin_headers):
-    media_id = 1
-    response = requests.get(f"{base_url}/api/media/{media_id}", headers=admin_headers)
+def test_get_media_existing_admin(admin_headers):
+    response = requests.get(
+        f"{BASE_URL}/api/media/1",
+        headers=admin_headers
+    )
+    assert response.status_code == 200
 
-    assert response.status_code in (200, 404), (
-        f"Unexpected status {response.status_code}: {response.text}"
+
+def test_get_media_existing_user(user_headers):
+    response = requests.get(
+        f"{BASE_URL}/api/media/1",
+        headers=user_headers
+    )
+    assert response.status_code == 200
+
+def test_get_media_nonexistent_admin(admin_headers):
+        response = requests.get(
+            f"{BASE_URL}/api/media/999999",
+            headers=admin_headers
+        )
+        assert response.status_code == 404
+
+def test_get_media_deleted_admin(admin_headers):
+        response = requests.get(
+            f"{BASE_URL}/api/media/2",
+            headers=admin_headers
+        )
+        assert response.status_code == 404
+
+
+def test_get_media_idempotent_admin(admin_headers):
+    r1 = requests.get(f"{BASE_URL}/api/media/1", headers=admin_headers)
+    r2 = requests.get(f"{BASE_URL}/api/media/1", headers=admin_headers)
+
+    assert r1.status_code == 200
+    assert r1.json() == r2.json()
+
+
+def test_get_media_response_structure_admin(admin_headers):
+    response = requests.get(
+        f"{BASE_URL}/api/media/1",
+        headers=admin_headers
     )
 
+    body = response.json()
 
-def test_get_media_by_id_user(base_url, user_headers):
-    media_id = 1
-    response = requests.get(f"{base_url}/api/media/{media_id}", headers=user_headers)
+    # обязательные поля
+    expected_fields = {
+        "id",
+        "url",
+        "altText",
+        "variant",
+        "primary",
+        "format",
+        "widthPx",
+        "heightPx",
+        "sizeBytes",
+        "sortOrder",
+        "deleted",
+        "createdAt",
+    }
 
-    assert response.status_code in (200, 404, 403), (
-        f"Unexpected status {response.status_code}: {response.text}"
-    )
+    assert expected_fields.issubset(body.keys())
