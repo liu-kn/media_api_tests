@@ -65,3 +65,4 @@ def test_get_media_response_structure_admin(admin_headers):
     }
 
     assert expected_fields.issubset(body.keys())
+
